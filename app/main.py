@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI
 
@@ -9,10 +11,25 @@ configure_logging(settings.logging.level)
 # 获取日志器
 logger = get_logger(__name__)
 
+
+# 生命周期管理
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info(f"{settings.app.name}，应用正在启动...")
+    from app.infra.database import check_database, close_database
+    try:
+        await check_database()
+        yield
+    finally:
+        logger.info("应用关闭中...")
+        await close_database()
+
+
 # 初始化FastApi
 app = FastAPI(
     title=settings.app.name,
-    debug=settings.app.debug
+    debug=settings.app.debug,
+    lifespan=lifespan,
 )
 
 

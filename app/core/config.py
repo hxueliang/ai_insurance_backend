@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # 以当前文件为基准，找向上2级的父目录，也就是项目的根目录
 APP_ROOT = Path(__file__).resolve().parents[2]
 
+
 class EnvSettings(BaseSettings):
     """公共settings，配置.env文件位置"""
     model_config = SettingsConfigDict(
@@ -14,12 +15,14 @@ class EnvSettings(BaseSettings):
         extra="ignore",  # settings中未定义的字段被忽略
     )
 
+
 class AppSettings(EnvSettings):
     """应用相关设置"""
     name: str = Field(alias="APP_NAME")
     host: str = Field(alias="APP_HOST", default="127.0.0.1")
     port: int = Field(alias="APP_PORT", default=8001)
     debug: bool = Field(alias="APP_DEBUG", default=True, description="是否开启FastAPI的DEBUG模式")
+
 
 class DatabaseSettings(EnvSettings):
     """数据库相关设置"""
@@ -28,6 +31,10 @@ class DatabaseSettings(EnvSettings):
     name: str = Field(alias="DB_NAME", default="insurance")
     user: str = Field(alias="DB_USER", default="insurance")
     password: str = Field(alias="DB_PASSWORD", default="insurance123")
+    echo: bool = Field(alias="DB_ECHO", default=False)
+    pool_size: int = Field(alias="DB_POOL_SIZE", default=5)
+    max_overflow: int = Field(alias="DB_MAX_OVERFLOW", default=10)
+    pool_recycle: int = Field(alias="DB_POOL_RECYCLE", default=1800)
 
     @computed_field
     @property
@@ -41,20 +48,24 @@ class DatabaseSettings(EnvSettings):
             password=self.password
         ).encoded_string()
 
+
 class LLMSettings(EnvSettings):
     """模型相关配置"""
     api_key: str = Field(alias="DEEPSEEK_API_KEY")
     chat_model: str = Field(alias="CHAT_MODEL", default="deepseek-v4-flash")
 
+
 class LoggingSettings(EnvSettings):
     """日志相关配置"""
-    level: str = Field(alias="LOGGING_LEVEL", default="INFO") # 可选值：DEBUG、INFO、WARNING、ERROR、CRITICAL
+    level: str = Field(alias="LOGGING_LEVEL", default="INFO")  # 可选值：DEBUG、INFO、WARNING、ERROR、CRITICAL
+
 
 class Settings(BaseSettings):
     app: AppSettings = Field(default_factory=AppSettings)
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
     llm: LLMSettings = Field(default_factory=LLMSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
+
 
 # 项目启动直接初始化
 settings = Settings()

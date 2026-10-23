@@ -26,7 +26,7 @@ dependencies = [
     "pyjwt>=2.13.0",
     "pymilvus>=3.0.0",
     "pypdf>=6.14.2",
-    "sqlalchemy>=2.0.51",
+    "sqlalchemy[asyncio]>=2.0.51",
     "structlog>=26.1.0",
     "uvicorn>=0.51.0",
 ]
@@ -38,5 +38,5 @@ default = true
 
 [tool.uv]
 override-dependencies = [
-  "faiss-cpu; sys_platform == 'linux'"
+    "faiss-cpu; sys_platform == 'linux'"
 ]
