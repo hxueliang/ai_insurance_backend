@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from app.core.config import settings
 from app.core.logging import configure_logging, get_logger
+from app.modules.product.router import router as router_product
 
 # 日志配置
 configure_logging(settings.logging.level)
@@ -31,6 +32,8 @@ app = FastAPI(
     debug=settings.app.debug,
     lifespan=lifespan,
 )
+
+app.include_router(router_product)
 
 
 @app.get("/healthy", summary="健康检查接口")
