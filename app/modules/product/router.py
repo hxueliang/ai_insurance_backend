@@ -8,11 +8,14 @@ from app.modules.product.service import ProductService
 router = APIRouter(prefix="/api/v1/products", tags=["product"])
 
 
+def get_productS_service(session: AsyncSession = Depends(get_session)):
+    service = ProductService(session)
+    yield service
+
+
 @router.get("", response_model=list[ProductResponse])
 async def get_products(
         category: str | None = None,
-        session: AsyncSession = Depends(get_session)
+        service: ProductService = Depends(get_productS_service)
 ) -> list[ProductResponse]:
-    service = ProductService(session)
-
     return await service.list_products(category)
