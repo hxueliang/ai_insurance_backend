@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from decimal import Decimal
+
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.database import get_session
@@ -19,3 +21,18 @@ async def get_products(
         service: ProductService = Depends(get_productS_service)
 ) -> list[ProductResponse]:
     return await service.list_products(category)
+
+
+@router.get("/candidates", response_model=list[ProductResponse])
+async def get_candidates(
+        categories: list[str] = Query(min_length=1),
+        premium_min: Decimal | None = None,
+        limit_per_category: int = 5,
+        service: ProductService = Depends(get_productS_service)
+) -> list[ProductResponse]:
+    print(categories, '====categories')
+    return await service.list_candidates(
+        categories=categories,
+        premium_min=premium_min,
+        limit_per_category=limit_per_category
+    )
