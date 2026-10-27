@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from app.core.config import settings
 from app.core.logging import configure_logging, get_logger
+from app.modules.chat_thread.router import router as router_chat_thread
 from app.modules.product.router import router as router_product
 
 # 日志配置
@@ -34,6 +35,7 @@ app = FastAPI(
 )
 
 app.include_router(router_product)
+app.include_router(router_chat_thread)
 
 
 @app.get("/healthy", summary="健康检查接口")

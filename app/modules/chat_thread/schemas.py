@@ -21,6 +21,6 @@ class ChatThreadResponse(BaseSchema):
     """会话响应"""
 
     id: UUID
-    name: str
+    title: str
     created_at: datetime
     updated_at: datetime

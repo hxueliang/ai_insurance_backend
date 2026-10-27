@@ -12,4 +12,5 @@ class ChatThreadService:
     async def add(self, user_id: int, title: str):
         async with self.session.begin():
             chat_thread = ChatThread(user_id=user_id, title=title)
-            return await self.repository.add(chat_thread)
+            await self.repository.add(chat_thread)
+            return chat_thread
