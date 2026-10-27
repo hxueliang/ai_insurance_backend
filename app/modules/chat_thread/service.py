@@ -17,3 +17,12 @@ class ChatThreadService:
 
     async def list_by_user_id(self, user_id: int):
         return await self.repository.list_by_user_id(user_id)
+
+    async def rename(self, thread_id: str, user_id: int, title: str):
+        async with self.session.begin():
+            chat_thread = await self.repository.find_owned(thread_id, user_id)
+
+            chat_thread.title = title
+            await self.session.flush()
+            await self.session.refresh(chat_thread)
+            return chat_thread

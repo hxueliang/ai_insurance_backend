@@ -32,3 +32,14 @@ async def list_by_user_id(
 ):
     """查询会话列表"""
     return await service.list_by_user_id(user_id)
+
+
+@router.patch("/{thread_id}", response_model=ChatThreadResponse)
+async def create_chat_thread(
+        request: ChatThreadCreate,
+        thread_id: str,
+        user_id: Annotated[int, Header(alias="x-user-id")],
+        service: ChatThreadService = Depends(get_service)
+):
+    """创建会话"""
+    return await service.rename(thread_id, user_id, request.title)

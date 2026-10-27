@@ -22,3 +22,9 @@ class ChatThreadRepository:
             )
         )
         return result.all()
+
+    async def find_owned(self, thread_id: str, user_id: int) -> ChatThread:
+        return await self.session.scalar(
+            select(ChatThread)
+            .where(ChatThread.id == thread_id, ChatThread.user_id == user_id)
+        )
