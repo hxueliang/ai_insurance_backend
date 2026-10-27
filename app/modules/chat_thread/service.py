@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.chat_thread.exceptions import ChatThreadNotFoundError
 from app.modules.chat_thread.models import ChatThread
 from app.modules.chat_thread.repository import ChatThreadRepository
 
@@ -21,6 +22,8 @@ class ChatThreadService:
     async def rename(self, thread_id: str, user_id: int, title: str):
         async with self.session.begin():
             chat_thread = await self.repository.find_owned(thread_id, user_id)
+            if not chat_thread:
+                raise ChatThreadNotFoundError
 
             chat_thread.title = title
             await self.session.flush()
