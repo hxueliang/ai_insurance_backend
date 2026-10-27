@@ -14,3 +14,6 @@ class ChatThreadService:
             chat_thread = ChatThread(user_id=user_id, title=title)
             await self.repository.add(chat_thread)
             return chat_thread
+
+    async def list_by_user_id(self, user_id: int):
+        return await self.repository.list_by_user_id(user_id)

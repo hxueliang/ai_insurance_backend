@@ -23,4 +23,12 @@ async def create_chat_thread(
 ):
     """创建会话"""
     return await service.add(user_id, request.title)
-   
+
+
+@router.get("", response_model=list[ChatThreadResponse])
+async def list_by_user_id(
+        user_id: Annotated[int, Header(alias="x-user-id")],
+        service: ChatThreadService = Depends(get_service)
+):
+    """查询会话列表"""
+    return await service.list_by_user_id(user_id)
