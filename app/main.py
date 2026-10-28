@@ -5,8 +5,8 @@ from fastapi import FastAPI, Request
 from starlette.responses import JSONResponse
 
 from app.core.config import settings
+from app.core.exceptions import ApplicationError
 from app.core.logging import configure_logging, get_logger
-from app.modules.chat_thread.exceptions import ChatThreadNotFoundError
 from app.modules.chat_thread.router import router as router_chat_thread
 from app.modules.product.router import router as router_product
 
@@ -47,14 +47,14 @@ async def healthy() -> dict[str, str]:
 
 
 # 统一处理异常信息
-@app.exception_handler(ChatThreadNotFoundError)
-def handle_exception(request: Request, exc: Exception):
-    logger.error(f"处理异常, 请求路径: {request.url}, 异常信息: {exc}")
+@app.exception_handler(ApplicationError)
+def handle_exception(request: Request, exc: ApplicationError):
+    logger.error(f"处理异常, 请求路径: {request.url}, 异常代码: {exc.code}，异常信息: {exc.message}")
     return JSONResponse(
-        status_code=400,
+        status_code=exc.status_code,
         content={
-            "code": "CHAT_THREAD_NOT_FOUND",
-            "message": "会话不存在或者不属于当前用户"
+            "code": exc.code,
+            "message": exc.message
         }
     )
 
