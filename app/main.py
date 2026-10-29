@@ -21,12 +21,15 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     logger.info(f"{settings.app.name}，应用正在启动...")
     from app.infra.database import check_database, close_database
+    from app.infra.checkpointer import init_checkpointer, close_checkpointer
     try:
         await check_database()
+        await init_checkpointer()
         yield
     finally:
         logger.info("应用关闭中...")
         await close_database()
+        await close_checkpointer()
 
 
 # 初始化FastApi
