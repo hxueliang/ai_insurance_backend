@@ -36,17 +36,25 @@ class DatabaseSettings(EnvSettings):
     max_overflow: int = Field(alias="DB_MAX_OVERFLOW", default=10)
     pool_recycle: int = Field(alias="DB_POOL_RECYCLE", default=1800)
 
-    @computed_field
-    @property
-    def url(self) -> str:
+    def base_usl(self, scheme: str):
         # 自动拼接URL路径
         return PostgresDsn.build(
-            scheme="postgresql+asyncpg",
+            scheme=scheme,
             host=self.host,
             port=self.port,
             username=self.user,
             password=self.password
         ).encoded_string()
+
+    @computed_field
+    @property
+    def url(self) -> str:
+        return self.base_usl("postgresql+asyncpg")
+
+    @computed_field
+    @property
+    def checkpoint_url(self) -> str:
+        return self.base_usl("postgresql")
 
 
 class LLMSettings(EnvSettings):
