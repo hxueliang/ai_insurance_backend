@@ -1,3 +1,4 @@
+from fastapi.sse import ServerSentEvent
 from langchain.messages import HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,9 +27,13 @@ class ChatService:
 
         _input = {"messages": [HumanMessage(content=chat_request.message)]}
         config = {"configurable": {"thread_id": str(chat_request.thread_id)}}
-        result = await self.agent.ainvoke(
+        stream = await self.agent.astream_events(
             _input,
             config,
+            version="v3"
         )
 
-        return result["messages"][-1].content
+        async for message in stream.messages:
+            async for chunk in message.text:
+                yield ServerSentEvent(data=chunk, event="message")
+        yield ServerSentEvent(data="END", event="done")

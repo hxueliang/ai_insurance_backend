@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, Request
+from fastapi.sse import EventSourceResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.database import get_session
@@ -18,11 +19,11 @@ async def get_service(
     return ChatService(session, agent)
 
 
-@router.post("")
+@router.post("", response_class=EventSourceResponse)
 async def chat(
         request: ChatRequest,
         user_id: Annotated[int, Header(alias="x-user-id")],
         service: ChatService = Depends(get_service)
 ):
-    stream = await service.chat_stream(request, user_id)
-    return stream
+    async for sse in service.chat_stream(request, user_id):
+        yield sse
