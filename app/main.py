@@ -7,6 +7,7 @@ from starlette.responses import JSONResponse
 from app.core.config import settings
 from app.core.exceptions import ApplicationError
 from app.core.logging import configure_logging, get_logger
+from app.modules.chat.router import router as router_chat
 from app.modules.chat_thread.router import router as router_chat_thread
 from app.modules.product.router import router as router_product
 
@@ -26,7 +27,7 @@ async def lifespan(app: FastAPI):
     try:
         await check_database()
         checkpointer = await init_checkpointer()
-        agent = init_insurance_agent(checkpointer)
+        app.state.agent = init_insurance_agent(checkpointer)
         yield
     finally:
         logger.info("应用关闭中...")
@@ -43,6 +44,7 @@ app = FastAPI(
 
 app.include_router(router_product)
 app.include_router(router_chat_thread)
+app.include_router(router_chat)
 
 
 @app.get("/healthy", summary="健康检查接口")
