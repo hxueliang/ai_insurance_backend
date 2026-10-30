@@ -68,11 +68,17 @@ class LoggingSettings(EnvSettings):
     level: str = Field(alias="LOGGING_LEVEL", default="INFO")  # 可选值：DEBUG、INFO、WARNING、ERROR、CRITICAL
 
 
+class RAGSettings(EnvSettings):
+    """RAG相关配置"""
+    mineru_token: str = Field(alias="MINERU_TOKEN")
+
+
 class Settings(BaseSettings):
     app: AppSettings = Field(default_factory=AppSettings)
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
     llm: LLMSettings = Field(default_factory=LLMSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
+    rag: RAGSettings = Field(default_factory=RAGSettings)
 
 
 # 项目启动直接初始化
