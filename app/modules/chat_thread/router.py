@@ -1,17 +1,21 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.database import get_session
-from app.modules.chat_thread.schemas import ChatThreadResponse, ChatThreadCreate
+from app.modules.chat_thread.schemas import ChatThreadResponse, ChatThreadCreate, ChatHistoryResponse
 from app.modules.chat_thread.service import ChatThreadService
 
 router = APIRouter(prefix="/api/v1/chat-threads", tags=["会话管理的接口"])
 
 
-async def get_service(session: AsyncSession = Depends(get_session)):
-    service = ChatThreadService(session)
+async def get_service(
+        request: Request,
+        session: AsyncSession = Depends(get_session)
+):
+    agent = request.app.state.agent
+    service = ChatThreadService(session, agent)
     return service
 
 
@@ -35,7 +39,7 @@ async def list_by_user_id(
 
 
 @router.patch("/{thread_id}", response_model=ChatThreadResponse)
-async def create_chat_thread(
+async def rename(
         request: ChatThreadCreate,
         thread_id: str,
         user_id: Annotated[int, Header(alias="x-user-id")],
@@ -43,3 +47,13 @@ async def create_chat_thread(
 ):
     """创建会话"""
     return await service.rename(thread_id, user_id, request.title)
+
+
+@router.get("/{thread_id}/messages", response_model=ChatHistoryResponse)
+async def get_chat_history(
+        thread_id: str,
+        user_id: Annotated[int, Header(alias="x-user-id")],
+        service: ChatThreadService = Depends(get_service)
+):
+    """创建会话"""
+    return await service.get_chat_history(thread_id, user_id)
