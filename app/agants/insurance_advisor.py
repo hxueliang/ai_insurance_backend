@@ -2,6 +2,7 @@ from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
+from app.agants.tools import query_candidate_products
 from app.core.config import settings
 from app.core.logging import get_logger
 
@@ -25,7 +26,7 @@ def init_insurance_agent(checkpointer: AsyncPostgresSaver):
         extra_body={"thinking": {"type": "disabled"}},
     )
 
-    tools = []
+    tools = [query_candidate_products]
 
     # 2.创建Agent
     agent = create_agent(
