@@ -40,6 +40,7 @@ class ChatThreadService:
             if not chat_thread:
                 raise ChatThreadNotFoundError
 
+            await self.agent.checkpointer.adelete_thread(thread_id)
             await self.repository.delete(chat_thread)
 
     async def get_chat_history(self, thread_id: str, user_id: int):
