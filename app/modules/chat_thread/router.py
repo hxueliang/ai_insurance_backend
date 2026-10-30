@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Request
+from fastapi import APIRouter, Depends, Header, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.database import get_session
@@ -49,11 +49,22 @@ async def rename(
     return await service.rename(thread_id, user_id, request.title)
 
 
+@router.delete("/{thread_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_chat_thread(
+        thread_id: str,
+        user_id: Annotated[int, Header(alias="x-user-id")],
+        service: ChatThreadService = Depends(get_service)
+):
+    """删除会话"""
+    await service.delete(thread_id, user_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.get("/{thread_id}/messages", response_model=ChatHistoryResponse)
 async def get_chat_history(
         thread_id: str,
         user_id: Annotated[int, Header(alias="x-user-id")],
         service: ChatThreadService = Depends(get_service)
 ):
-    """创建会话"""
+    """获取会话历史消息"""
     return await service.get_chat_history(thread_id, user_id)

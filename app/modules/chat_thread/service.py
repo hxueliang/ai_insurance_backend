@@ -34,6 +34,14 @@ class ChatThreadService:
             await self.session.refresh(chat_thread)
             return chat_thread
 
+    async def delete(self, thread_id: str, user_id: int) -> None:
+        async with self.session.begin():
+            chat_thread = await self.repository.find_owned(thread_id, user_id)
+            if not chat_thread:
+                raise ChatThreadNotFoundError
+
+            await self.repository.delete(chat_thread)
+
     async def get_chat_history(self, thread_id: str, user_id: int):
         chat_thread = await self.repository.find_owned(thread_id, user_id)
         if not chat_thread:
@@ -54,7 +62,7 @@ class ChatThreadService:
                 continue
             if not message.text:
                 continue
-            
+
             messages.append(ChatMessageResponse(role=role, content=message.text))
 
         return ChatHistoryResponse(thread_id=thread_id, messages=messages)
