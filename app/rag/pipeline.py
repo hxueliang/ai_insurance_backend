@@ -155,3 +155,4 @@ class RAGPipeline:
         """关闭mineru连接"""
 
         self._mineru.close()
+        logger.info("RAG Pipeline 已关闭...")

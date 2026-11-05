@@ -24,6 +24,7 @@ async def lifespan(app: FastAPI):
     from app.infra.database import check_database, close_database
     from app.infra.checkpointer import init_checkpointer, close_checkpointer
     from app.agants.insurance_advisor import init_insurance_agent
+    from app.rag import close_rag  # 导入模块就会初始化
     try:
         await check_database()
         checkpointer = await init_checkpointer()
@@ -31,6 +32,7 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         logger.info("应用关闭中...")
+        close_rag()
         await close_database()
         await close_checkpointer()
 
