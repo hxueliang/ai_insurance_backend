@@ -2,7 +2,7 @@ from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
-from app.agants.tools import query_candidate_products, query_product_clause
+from app.agents.tools import query_candidate_products, query_product_clause
 from app.core.config import settings
 from app.core.logging import get_logger
 
