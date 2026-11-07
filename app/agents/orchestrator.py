@@ -1,8 +1,9 @@
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, BaseMessage
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command
 
+from app.agents.intent_router import intent_router
 from app.agents.schemas import InsuranceAgentState, Intent
 
 
@@ -14,17 +15,39 @@ async def route_node(state: InsuranceAgentState) -> Command[Intent]:
 
     # 1.获取active_workflow，也就是上一轮会话的工作流
     previous_workflow = state.get("active_workflow", "")
-
-    # 2.本轮工作流
-    active_workflow = "chitchat"  # mock
+    # 获取用户本轮提问
+    messages = state.get("messages")
+    user_query = messages[-1]
+    # 上下文
+    previous_ai_message = find_previous_ai_message(messages)
+    content = f"上一轮工作流：{previous_workflow} \n 上一轮AI回复的信息：{previous_ai_message}"
+    # 2.调用路由工具，完成意图识别
+    result = await intent_router.route(user_query, content)
 
     return Command(
         update={
             "previous_workflow": previous_workflow,
-            "active_workflow": active_workflow
+            "active_workflow": result.intent
         },
-        goto=active_workflow,
+        goto=result.intent
     )
+
+
+def find_previous_ai_message(messages: list[BaseMessage]) -> str:
+    """查找本轮用户消息之前最近一条可展示的AI回复"""
+
+    for message in reversed(messages[:-1]):
+        # 跳过非AIMessage
+        if not isinstance(message, AIMessage):
+            continue
+        # 跳过工具消息
+        if message.tool_calls:
+            continue
+        # 如果是正常AIMessage，直接返回
+        if message.text:
+            return message.text
+    # 如果是空消息
+    return ""
 
 
 # 2.闲聊节点
