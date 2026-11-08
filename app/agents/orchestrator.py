@@ -17,7 +17,7 @@ async def route_node(state: InsuranceAgentState) -> Command[Intent]:
     previous_workflow = state.get("active_workflow", "")
     # 获取用户本轮提问
     messages = state.get("messages")
-    user_query = messages[-1]
+    user_query = messages[-1].text
     # 上下文
     previous_ai_message = find_previous_ai_message(messages)
     content = f"上一轮工作流：{previous_workflow} \n 上一轮AI回复的信息：{previous_ai_message}"
