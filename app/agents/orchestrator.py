@@ -24,6 +24,17 @@ async def route_node(state: InsuranceAgentState) -> Command[Intent]:
     # 2.调用路由工具，完成意图识别
     result = await intent_router.route(user_query, content)
 
+    if isinstance(result, str):
+        # 当前识别出的是寒暄，直接返回固定回复结果
+        return Command(
+            update={
+                "previous_workflow": previous_workflow,
+                "active_workflow": "chitchat",
+                "message": [AIMessage(content=result)]
+            },
+            goto=END
+        )
+
     return Command(
         update={
             "previous_workflow": previous_workflow,

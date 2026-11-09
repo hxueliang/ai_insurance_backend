@@ -4,6 +4,7 @@ from langchain.messages import HumanMessage, SystemMessage
 from app.agents.schemas import RouteResult
 from app.core.config import settings
 from app.core.logging import get_logger
+from app.utils.small_talk_recognition import match_social_intent, response_by_social_intent
 
 logger = get_logger(__name__)
 
@@ -36,10 +37,17 @@ class IntentRouter:
             query: str,  # 本轮用户的提问
             context: str  # 历史对话的上下文（可以包含：上一轮的工作流名字、上一轮AI回复的消息）
     ) -> RouteResult:
-        result = await self.route_model.ainvoke([
+        # 寒暄识别（基于规则 -> 正则表达式）
+        intent = match_social_intent(query)
+        if intent:
+            # 返回固定的寒暄回复
+            return response_by_social_intent(intent)
+        # 基于模型的意图识别
+        result: RouteResult = await self.route_model.ainvoke([
             SystemMessage(content=SYSTEM_PROMPT),
             HumanMessage(f"历史对话信息：{context}\n 用户本轮消息：{query}\n"),
         ])
+        logger.info(f"意图识别完成，intent: {result.intent}, reason: {result.reason}")
         return result
 
 
