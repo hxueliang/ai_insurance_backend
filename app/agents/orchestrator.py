@@ -3,6 +3,7 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command
 
+from app.agents.chitchat import init_chitchat_agent
 from app.agents.intent_router import intent_router
 from app.agents.schemas import InsuranceAgentState, Intent
 
@@ -61,11 +62,6 @@ def find_previous_ai_message(messages: list[BaseMessage]) -> str:
     return ""
 
 
-# 2.闲聊节点
-async def chitchat_node(state: InsuranceAgentState) -> dict:
-    return {"messages": [AIMessage("你好，我是测试代码，今天想聊点什么？")]}
-
-
 # 3.保险推荐节点
 async def recommendation_node(state: InsuranceAgentState) -> dict:
     return {"messages": [AIMessage("保险推荐工作流暂未接入。")]}
@@ -92,7 +88,7 @@ def init_insurance_agent(checkpointer: AsyncPostgresSaver):
 
     builder = StateGraph(InsuranceAgentState)
     builder.add_node("route", route_node)
-    builder.add_node("chitchat", chitchat_node)
+    builder.add_node("chitchat", init_chitchat_agent())
     builder.add_node("recommendation_plan", recommendation_node)
     builder.add_node("claim", claim_node)
     builder.add_node("human_handoff", human_handoff_node)
