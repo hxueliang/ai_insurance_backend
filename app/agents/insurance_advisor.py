@@ -19,7 +19,7 @@ SYSTEM_PROMPT = """
 """
 
 
-def init_insurance_agent(checkpointer: AsyncPostgresSaver):
+def init_insurance_advisor(checkpointer: AsyncPostgresSaver | bool = True):
     """初始化保险顾问Agent"""
 
     # 1.初始化模型
